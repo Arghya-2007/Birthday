@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap');
+
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+:root {
+  --color-bg: #0A0A0B;
+  --color-surface: #141416;
+  --color-midnight: #0D1B2A;
+  --color-walnut: #2C1A0E;
+  --color-ivory: #F5F0E8;
+  --color-champagne: #C9A96E;
+  --color-amber: #D4884A;
+  --color-muted: #2A2A2D;
+  --color-text-primary: #F5F0E8;
+  --color-text-secondary: #9A9490;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 64px;
+  --space-2xl: 128px;
+  --space-3xl: 256px;
+
+  --z-base: 0;
+  --z-canvas: 10;
+  --z-overlay: 20;
+  --z-three: 30;
+  --z-ui: 40;
+  --z-loader: 100;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
