@@ -64,7 +64,7 @@ export default function BirthdayUI() {
     <div ref={containerRef} className="relative w-full h-screen flex flex-col items-center justify-between py-6 md:py-10 overflow-hidden bg-gradient-to-b from-[#05020a] via-[#0f051a] to-[#05020a]">
       
       {/* Premium Cinematic Vignette & Grain */}
-      <div className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay opacity-30" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+      <div className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay opacity-30 bg-[url('/noise.png')] bg-repeat"></div>
       <div className="absolute inset-0 pointer-events-none z-20 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.85)_100%)]"></div>
 
       {/* Animated Ambient Orbs */}
