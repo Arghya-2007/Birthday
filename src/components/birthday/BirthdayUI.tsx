@@ -1,7 +1,7 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
-import { Environment, Lightformer, Sparkles } from '@react-three/drei'
+import { Environment, Sparkles } from '@react-three/drei'
 import { CakeModel } from './CakeModel'
 import { Suspense, useState, useEffect, useRef } from 'react'
 import gsap from 'gsap'
@@ -62,7 +62,7 @@ export default function BirthdayUI() {
 
   return (
     <div ref={containerRef} className="relative w-full h-screen flex flex-col items-center justify-between py-6 md:py-10 overflow-hidden bg-gradient-to-b from-[#05020a] via-[#0f051a] to-[#05020a]">
-      
+
       {/* Premium Cinematic Vignette & Grain */}
       <div className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay opacity-30 bg-[url('/noise.png')] bg-repeat"></div>
       <div className="absolute inset-0 pointer-events-none z-20 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.85)_100%)]"></div>
@@ -80,7 +80,7 @@ export default function BirthdayUI() {
           <Suspense fallback={null}>
             <Environment preset="city" />
             <CakeModel playAnimation={isVisible} onAnimationComplete={() => setAnimationDone(true)} />
-            
+
             {/* Base ambient sparkles */}
             <Sparkles count={150} scale={14} size={1.5} speed={0.3} opacity={0.4} color="#f0abfc" />
 

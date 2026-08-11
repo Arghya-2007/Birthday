@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { playLoaderEntrance, playLoaderExit } from '@/animations/loadingAnimations';
 
@@ -10,6 +10,7 @@ interface LoadingScreenProps {
 }
 
 export default function LoadingScreen({ progress, onComplete }: LoadingScreenProps) {
+  const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLDivElement>(null);
@@ -47,7 +48,10 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
         if (!percentRef.current) return;
         const currentVal = Math.round(progressObj.current.value);
         if (progress >= 100 && currentVal >= 99) {
-          percentRef.current.innerText = 'Ready.';
+          // If we haven't set the 'Enter' text yet, just say Ready
+          if (percentRef.current.innerText !== 'Enter') {
+            percentRef.current.innerText = 'Ready.';
+          }
         } else {
           percentRef.current.innerText = `${currentVal}%`;
         }
@@ -57,21 +61,43 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
     if (progress >= 100) {
       // 800ms for animation to reach 100, plus a brief pause to read "Ready."
       const timer = setTimeout(() => {
-        playLoaderExit(containerRef).then(() => {
-          onComplete();
-        });
+        setIsReady(true);
+        if (percentRef.current) {
+          percentRef.current.innerText = 'Enter';
+          // Add a subtle pulse to invite the click
+          gsap.to(percentRef.current, {
+            scale: 1.05,
+            opacity: 0.8,
+            duration: 1,
+            yoyo: true,
+            repeat: -1,
+            ease: "sine.inOut"
+          });
+        }
       }, 1400);
       
       return () => clearTimeout(timer);
     }
   }, [progress, onComplete]);
 
+  const handleEnter = () => {
+    if (!isReady) return;
+    
+    // Stop the pulsing animation before exiting
+    if (percentRef.current) gsap.killTweensOf(percentRef.current);
+    
+    playLoaderExit(containerRef).then(() => {
+      onComplete();
+    });
+  };
+
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 flex flex-col items-center justify-center bg-bg text-text-primary z-[var(--z-loader)]"
+      onClick={handleEnter}
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-bg text-text-primary z-[var(--z-loader)] ${isReady ? 'cursor-pointer' : ''}`}
     >
-      <div className="flex flex-col items-center flex-grow justify-center w-full">
+      <div className="flex flex-col items-center flex-grow justify-center w-full pointer-events-none">
         <div 
           ref={dateRef}
           className="font-display uppercase tracking-cinematic text-text-secondary text-xs mb-4 opacity-0"
@@ -90,7 +116,7 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
         
         <div 
           ref={percentRef}
-          className="font-display text-[clamp(3rem,6vw,4.5rem)] font-light text-ivory opacity-0 tracking-normal"
+          className="font-display text-[clamp(3rem,6vw,4.5rem)] font-light text-ivory opacity-0 tracking-normal transition-colors hover:text-champagne"
         >
           0%
         </div>
@@ -98,7 +124,7 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
 
       <div 
         ref={barContainerRef}
-        className="w-full h-[1px] bg-muted absolute bottom-0 opacity-0"
+        className="w-full h-[1px] bg-muted absolute bottom-0 opacity-0 pointer-events-none"
       >
         <div 
           ref={barFillRef}
