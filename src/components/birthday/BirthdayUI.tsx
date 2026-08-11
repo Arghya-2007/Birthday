@@ -68,19 +68,17 @@ export default function BirthdayUI() {
       <div className="absolute inset-0 pointer-events-none z-20 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.85)_100%)]"></div>
 
       {/* Animated Ambient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse pointer-events-none z-0"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse pointer-events-none z-0" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-amber-500/10 rounded-full mix-blend-screen filter blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[radial-gradient(circle,rgba(147,51,234,0.3)_0%,transparent_70%)] rounded-full animate-pulse pointer-events-none z-0"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[radial-gradient(circle,rgba(219,39,119,0.3)_0%,transparent_70%)] rounded-full animate-pulse pointer-events-none z-0" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-[radial-gradient(circle,rgba(245,158,11,0.15)_0%,transparent_70%)] rounded-full pointer-events-none z-0"></div>
 
       {/* 3D Canvas Interactive Area */}
       <div className="absolute inset-0 z-10" style={{ touchAction: 'none' }}>
-        <Canvas camera={{ position: [0, 0, 7], fov: 45 }}>
+        <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]}>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
           <Suspense fallback={null}>
-            <Environment preset="city">
-              <Lightformer intensity={8} position={[10, 5, 0]} scale={[10, 50, 1]} onUpdate={self => self.lookAt(0, 0, 0)} />
-            </Environment>
+            <Environment preset="city" />
             <CakeModel playAnimation={isVisible} onAnimationComplete={() => setAnimationDone(true)} />
             
             {/* Base ambient sparkles */}
