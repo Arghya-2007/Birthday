@@ -22,9 +22,10 @@ export async function preloadCriticalAssets(
   const device = detectDevice()
 
   // Preload all frames for perfectly smooth rendering
-  const totalItems = TOTAL_FRAMES + 1 // +1 for 3D model
+  const totalItems = TOTAL_FRAMES + 2 // +1 for 3D model, +1 for audio
   let framesLoaded = 0
   let modelLoaded = 0
+  let audioLoaded = 0
 
   await Promise.all([
     // Load all opening frames
@@ -35,7 +36,7 @@ export async function preloadCriticalAssets(
       globalFrameCache,
       (loaded) => {
         framesLoaded = loaded
-        onProgress(((framesLoaded + modelLoaded) / totalItems) * 100)
+        onProgress(((framesLoaded + modelLoaded + audioLoaded) / totalItems) * 100)
       }
     ),
 
@@ -44,7 +45,14 @@ export async function preloadCriticalAssets(
       .catch(() => { })
       .finally(() => {
         modelLoaded = 1
-        onProgress(((framesLoaded + modelLoaded) / totalItems) * 100)
+        onProgress(((framesLoaded + modelLoaded + audioLoaded) / totalItems) * 100)
       }),
+
+    fetch('/audio/bg-music.mp3', { priority: 'high' as RequestPriority })
+      .catch(() => { })
+      .finally(() => {
+        audioLoaded = 1
+        onProgress(((framesLoaded + modelLoaded + audioLoaded) / totalItems) * 100)
+      })
   ])
 }

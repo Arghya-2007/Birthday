@@ -33,8 +33,10 @@ const ElegantText = memo(({ text, className, style }: { text: string; className?
           <span
             className="word-inner inline-block opacity-0"
             style={{
-              transform: 'translate3d(0, 100%, 0)',
-              willChange: 'transform, opacity',
+              transform: 'perspective(1000px) translate3d(0, 100%, 0) rotateX(-60deg) scale(0.9)',
+              filter: 'blur(12px)',
+              transformOrigin: 'top center',
+              willChange: 'transform, opacity, filter',
             }}
           >
             {word}
@@ -88,6 +90,65 @@ const TRAIL_IMAGES = [
   './images/image-7.jpg',
 ]
 
+// ─── CSS & Particles ─────────────────────────────────────────────────────────
+const ParticlesStyle = memo(() => (
+  <style>{`
+    @keyframes float-particle {
+      0% { transform: translateY(0px) scale(1); opacity: 0.2; }
+      50% { transform: translateY(-20px) scale(1.5); opacity: 0.8; }
+      100% { transform: translateY(0px) scale(1); opacity: 0.2; }
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { opacity: 0.5; }
+      100% { transform: scale(1.2); opacity: 0; }
+    }
+  `}</style>
+))
+ParticlesStyle.displayName = 'ParticlesStyle'
+
+const FloatingParticles = memo(() => {
+  const particles = useMemo(() => {
+    return Array.from({ length: 15 }).map((_, i) => {
+      // Deterministic pseudo-random generation to ensure pure render
+      const r1 = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
+      const r2 = Math.abs((Math.sin(i * 78.233) * 43758.5453) % 1);
+      const r3 = Math.abs((Math.sin(i * 45.123) * 43758.5453) % 1);
+      const r4 = Math.abs((Math.sin(i * 93.284) * 43758.5453) % 1);
+      const r5 = Math.abs((Math.sin(i * 21.942) * 43758.5453) % 1);
+
+      return {
+        id: i,
+        left: `${(r1 * 100).toFixed(2)}%`,
+        top: `${(r2 * 100).toFixed(2)}%`,
+        size: +(r3 * 2 + 1).toFixed(2),
+        duration: +(r4 * 4 + 4).toFixed(2),
+        delay: +(r5 * 4).toFixed(2),
+      };
+    })
+  }, [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none mix-blend-screen opacity-60">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full bg-[#C9A96E]"
+          style={{
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            boxShadow: `0 0 ${p.size * 3}px rgba(201,169,110,0.8)`,
+            animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite alternate`,
+          }}
+        />
+      ))}
+    </div>
+  )
+})
+FloatingParticles.displayName = 'FloatingParticles'
+
 // ─── Content ─────────────────────────────────────────────────────────────────
 // The main text block for each scene. Memoised on scene.id since the scene
 // object reference may change between renders even when content is identical.
@@ -95,10 +156,11 @@ const Content = memo(({ scene }: { scene: Scene }) => (
   <div className={`relative flex flex-col w-full ${scene.position === 'right' ? 'items-end' : 'items-start'}`}>
     {/* Large background number for editorial look */}
     <div
-      className={`absolute top-0 font-display text-[12rem] leading-none text-[#F5F0E8] pointer-events-none select-none ${scene.position === 'right' ? 'right-0 translate-x-[10%]' : 'left-0 -translate-x-[10%]'}`}
+      className={`scene-bg-number absolute top-0 font-display text-[16rem] md:text-[20rem] leading-none text-[#F5F0E8] pointer-events-none select-none ${scene.position === 'right' ? 'right-0 translate-x-[15%]' : 'left-0 -translate-x-[15%]'}`}
       style={{
-        opacity: 0.03,
-        transform: `translate3d(${scene.position === 'right' ? '10%' : '-10%'}, -50%, 0)`,
+        opacity: 0,
+        transform: `translate3d(${scene.position === 'right' ? '15%' : '-15%'}, -20%, 0)`,
+        willChange: 'transform, opacity',
       }}
     >
       {getSceneNumber(scene.id)}
@@ -117,9 +179,21 @@ const Content = memo(({ scene }: { scene: Scene }) => (
         transform: 'translate3d(0, 0, 0)',
       }}
     >
+      {/* Premium Gradient Backgrounds & Glows */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a]/60 via-[#1a1a1a]/30 to-transparent rounded-3xl pointer-events-none shadow-[inset_0_0_40px_rgba(201,169,110,0.02)]" />
+      <div className="absolute inset-0 border border-[#C9A96E]/15 rounded-3xl pointer-events-none mix-blend-overlay" />
+      
+      {/* Animated Glows */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A96E]/15 blur-[80px] rounded-full pointer-events-none mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }} />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C9A96E]/10 blur-[80px] rounded-full pointer-events-none mix-blend-screen animate-pulse" style={{ animationDuration: '6s' }} />
+
+      <FloatingParticles />
+
       {/* Decorative Corner Accents */}
-      <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-white/10 rounded-tl-3xl" />
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-white/10 rounded-br-3xl" />
+      <div className="corner-accent absolute top-[-1px] left-[-1px] w-12 h-12 border-t border-l border-[#C9A96E]/30 rounded-tl-3xl opacity-0" style={{ willChange: 'transform, opacity' }} />
+      <div className="corner-accent absolute bottom-[-1px] right-[-1px] w-12 h-12 border-b border-r border-[#C9A96E]/30 rounded-br-3xl opacity-0" style={{ willChange: 'transform, opacity' }} />
+      <div className="corner-dot absolute top-5 left-5 w-1.5 h-1.5 rounded-full bg-[#C9A96E]/30 opacity-0" style={{ willChange: 'transform, opacity' }} />
+      <div className="corner-dot absolute bottom-5 right-5 w-1.5 h-1.5 rounded-full bg-[#C9A96E]/30 opacity-0" style={{ willChange: 'transform, opacity' }} />
 
       <div className="flex items-center gap-4 mb-8 opacity-90">
         {scene.position === 'right' && <div className="w-12 h-[1px] bg-gradient-to-r from-transparent to-[#C9A96E]" />}
@@ -182,10 +256,10 @@ const Decorative = memo(({ scene }: { scene: Scene }) => (
   >
     <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none opacity-50 group-hover:opacity-0 transition-opacity duration-500">
       <div className="flex flex-col items-center gap-4">
-        <svg className="w-10 h-10 animate-bounce text-[#C9A96E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+        <svg className="w-8 h-8 animate-pulse text-[#C9A96E]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
         </svg>
-        <span className="font-body text-xs md:text-sm uppercase tracking-[0.3em] text-[#C9A96E]">Hover around</span>
+        <span className="font-body text-xs md:text-sm uppercase tracking-[0.4em] text-[#C9A96E]/80 font-light">Explore</span>
       </div>
     </div>
     <div className="absolute inset-0 z-0">
@@ -196,7 +270,13 @@ const Decorative = memo(({ scene }: { scene: Scene }) => (
         className="w-[1px] h-24 md:h-40 decorative-line bg-gradient-to-b from-transparent via-[#C9A96E] to-transparent"
         style={{ opacity: 0, willChange: 'transform, opacity', transform: 'translate3d(0, 0, 0)' }}
       />
-      <RotatingStamp />
+      <div className="relative group/stamp">
+        <div className="absolute inset-[-40px] border border-dashed border-[#C9A96E]/10 rounded-full animate-[spin_30s_linear_infinite] transition-all duration-1000 group-hover/stamp:border-[#C9A96E]/30 group-hover/stamp:scale-105" />
+        <div className="absolute inset-[-24px] border border-dashed border-[#C9A96E]/20 rounded-full animate-[spin_20s_linear_infinite] transition-all duration-1000 group-hover/stamp:border-[#C9A96E]/40 group-hover/stamp:scale-110" />
+        <div className="absolute inset-[-12px] border border-[#C9A96E]/30 rounded-full animate-[spin_15s_linear_infinite_reverse] transition-all duration-1000 group-hover/stamp:border-[#C9A96E]/50 group-hover/stamp:scale-95" />
+        <div className="absolute inset-0 rounded-full animate-[pulse-ring_4s_cubic-bezier(0.4,0,0.6,1)_infinite] border border-[#C9A96E]/40" />
+        <RotatingStamp />
+      </div>
       <div
         className="w-[1px] h-24 md:h-40 decorative-line bg-gradient-to-t from-transparent via-[#C9A96E] to-transparent"
         style={{ opacity: 0, willChange: 'transform, opacity', transform: 'translate3d(0, 0, 0)' }}
@@ -226,6 +306,8 @@ export default function StorySection({ scene, totalFrames }: StorySectionProps) 
     const lines = el.querySelectorAll<HTMLElement>('.decorative-line')
     const stamps = el.querySelectorAll<HTMLElement>('.decorative-stamp')
     const metadata = el.querySelectorAll<HTMLElement>('.metadata-item')
+    const bgNumbers = el.querySelectorAll<HTMLElement>('.scene-bg-number')
+    const corners = el.querySelectorAll<HTMLElement>('.corner-accent, .corner-dot')
 
     const ctx = gsap.context(() => {
       // ── ScrollTrigger-driven timeline ──────────────────────────────────
@@ -245,6 +327,40 @@ export default function StorySection({ scene, totalFrames }: StorySectionProps) 
       })
 
       tl.add('start')
+
+      // ── Entrance: Background Number Parallax ───────────────────────────
+      if (bgNumbers.length > 0) {
+        tl.fromTo(
+          bgNumbers,
+          { autoAlpha: 0, yPercent: 20, scale: 0.85, filter: 'blur(12px)' },
+          {
+            autoAlpha: 0.04,
+            yPercent: -10,
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 1.8,
+            ease: 'none',
+          },
+          'start'
+        )
+      }
+
+      // ── Entrance: Premium Corner Accents ───────────────────────────────
+      if (corners.length > 0) {
+        tl.fromTo(
+          corners,
+          { autoAlpha: 0, scale: 0.5 },
+          {
+            autoAlpha: 1,
+            scale: 1,
+            duration: 1.2,
+            stagger: 0.1,
+            ease: 'back.out(1.5)',
+            force3D: true,
+          },
+          'start+=0.2'
+        )
+      }
 
       // ── Entrance: scene-label ──────────────────────────────────────────
       // GPU-only: translate3d + autoAlpha (uses visibility:hidden when 0,
@@ -311,10 +427,13 @@ export default function StorySection({ scene, totalFrames }: StorySectionProps) 
           {
             yPercent: 0,
             y: 0,
+            rotationX: 0,
+            scale: 1,
             autoAlpha: 1,
-            duration: 0.8,
-            stagger: 0.05,
-            ease: 'power3.out',
+            filter: 'blur(0px)',
+            duration: 1.4,
+            stagger: 0.06,
+            ease: 'expo.out',
             force3D: true,
           },
           'start+=0.2'
@@ -374,8 +493,10 @@ export default function StorySection({ scene, totalFrames }: StorySectionProps) 
   const top = (scene.frameStart / totalFrames) * 100
 
   return (
-    <div
-      ref={containerDivRef}
+    <>
+      <ParticlesStyle />
+      <div
+        ref={containerDivRef}
       style={{
         position: 'absolute',
         top: `calc(${top}% + 40vh)`,
@@ -407,5 +528,6 @@ export default function StorySection({ scene, totalFrames }: StorySectionProps) 
         </>
       )}
     </div>
+    </>
   )
 }

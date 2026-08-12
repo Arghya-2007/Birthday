@@ -158,6 +158,14 @@ export default function Hero({ onEntranceComplete, isActive = true }: HeroProps)
 
       </div>
 
+      {/* Scroll Down Indicator */}
+      <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none opacity-80 mix-blend-screen">
+        <span className="font-body text-[0.55rem] md:text-[0.65rem] tracking-[0.3em] text-champagne uppercase font-light">Scroll to explore</span>
+        <div className="w-[20px] h-[32px] rounded-full border border-champagne/30 flex justify-center p-[2px]">
+          <div className="w-1 h-2.5 rounded-full bg-champagne/80 animate-bounce" />
+        </div>
+      </div>
+
       {/* 3. Bottom Container (Marquee reverse) */}
       <div ref={bottomMarqueeRef} className="w-full z-10 pb-4 pt-2">
         <Marquee text="HAPPY BIRTHDAY ANTARA • " reverse />

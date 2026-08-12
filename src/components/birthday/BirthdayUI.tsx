@@ -38,10 +38,26 @@ export default function BirthdayUI() {
     if (isVisible) {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-      // Title reveal: cinematic zoom out and fade in
+      // Title reveal: Premium cinematic 3D reveal with blur, zoom, and rotation
       tl.fromTo(titleRef.current,
-        { y: 50, opacity: 0, scale: 1.15 },
-        { y: 0, opacity: 1, scale: 1, duration: 2, delay: 0.2 } // Epic slow drop
+        { 
+          y: 100, 
+          opacity: 0, 
+          scale: 1.25, 
+          rotationX: 45, 
+          transformPerspective: 1000, 
+          filter: 'blur(15px)' 
+        },
+        { 
+          y: 0, 
+          opacity: 1, 
+          scale: 1, 
+          rotationX: 0, 
+          filter: 'blur(0px)', 
+          duration: 3, 
+          delay: 0.2, 
+          ease: 'expo.out' 
+        }
       )
 
       // Cards reveal: slide up from below
@@ -96,10 +112,11 @@ export default function BirthdayUI() {
       </div>
 
       {/* Foreground UI - Top */}
-      <div className="z-10 flex flex-col items-center text-center px-6 pointer-events-none w-full mt-2 md:mt-4">
+      <div className="z-10 flex flex-col items-center text-center px-4 pointer-events-none w-full mt-2 md:mt-8">
         <h1
           ref={titleRef}
-          className="text-5xl md:text-7xl lg:text-8xl font-serif font-light tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-[#FFF7D6] via-[#D4AF37] to-[#AA7C11] drop-shadow-[0_0_30px_rgba(212,175,55,0.4)] opacity-0 py-4 px-4 leading-normal"
+          className="text-7xl md:text-8xl lg:text-[10rem] font-serif font-light tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-[#FFF7D6] via-[#D4AF37] to-[#AA7C11] drop-shadow-[0_0_50px_rgba(212,175,55,0.6)] opacity-0 py-4 px-4 leading-tight"
+          style={{ transformStyle: 'preserve-3d' }}
         >
           Happy Birthday
         </h1>
