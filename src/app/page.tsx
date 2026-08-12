@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import LoadingScreen from '@/components/loading/LoadingScreen'
 import { preloadCriticalAssets } from '@/lib/preload'
 import { useLenis } from '@/hooks/useLenis'
-import { Howl } from 'howler'
+import { playBackgroundAudio } from '@/lib/audio'
 import Hero from '@/components/hero/Hero'
 import ImageSequence from '@/components/sequence/ImageSequence'
 import { TOTAL_FRAMES } from '@/lib/assets'
@@ -24,37 +24,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!isLoading) {
-      const sound = new Howl({
-        src: ['/audio/bg-music.mp3'],
-        loop: true,
-        volume: 1,
-        html5: true, // Crucial for large audio files to stream and bypass some autoplay blocks
-        autoplay: true,
-      });
-      
-      // We start the music when loading completes and the hero reveals.
-      if (!sound.playing()) {
-        sound.play();
-      }
-
-      // To guarantee it plays even if the browser blocked the initial autoplay,
-      // we attach a one-time listener to the document to play on the first interaction.
-      const unlockAudio = () => {
-        if (!sound.playing()) {
-          sound.play();
-        }
-        document.removeEventListener('click', unlockAudio);
-        document.removeEventListener('touchstart', unlockAudio);
-      };
-
-      document.addEventListener('click', unlockAudio);
-      document.addEventListener('touchstart', unlockAudio);
-
-      return () => {
-        document.removeEventListener('click', unlockAudio);
-        document.removeEventListener('touchstart', unlockAudio);
-        sound.unload();
-      };
+      const cleanup = playBackgroundAudio();
+      return cleanup;
     }
   }, [isLoading])
 

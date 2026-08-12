@@ -33,15 +33,15 @@ export function CakeModel({ playAnimation = false, onAnimationComplete }: { play
   return (
     <PresentationControls
       global
-      zoom={1.2}
+      zoom={1.5}
       rotation={[0.3, -Math.PI / 4, 0]}
       polar={[-Math.PI / 6, Math.PI / 6]}
       azimuth={[-Math.PI / 4, Math.PI / 4]}
       snap={true}
     >
       <Float speed={2} rotationIntensity={0.2} floatIntensity={0.3}>
-        <Center position={[0, 3.5, 0]}>
-          <primitive object={scene} scale={1.8} />
+        <Center position={[0, 4, 0]}>
+          <primitive object={scene} scale={2} />
         </Center>
       </Float>
     </PresentationControls>

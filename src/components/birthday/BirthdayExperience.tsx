@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { ScrollTrigger } from '@/animations/gsap'
 import BirthdayUI from './BirthdayUI'
 
 export default function BirthdayExperience() {

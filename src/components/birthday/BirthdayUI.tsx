@@ -4,9 +4,11 @@ import { Canvas } from '@react-three/fiber'
 import { Environment, Sparkles } from '@react-three/drei'
 import { CakeModel } from './CakeModel'
 import { Suspense, useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import gsap from 'gsap'
 
 export default function BirthdayUI() {
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [animationDone, setAnimationDone] = useState(false)
@@ -14,6 +16,7 @@ export default function BirthdayUI() {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const cardLeftRef = useRef<HTMLDivElement>(null)
   const cardRightRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const textRefs = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
@@ -40,28 +43,28 @@ export default function BirthdayUI() {
 
       // Title reveal: Premium cinematic 3D reveal with blur, zoom, and rotation
       tl.fromTo(titleRef.current,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 1.25, 
-          rotationX: 45, 
-          transformPerspective: 1000, 
-          filter: 'blur(15px)' 
+        {
+          y: 100,
+          opacity: 0,
+          scale: 1.25,
+          rotationX: 45,
+          transformPerspective: 1000,
+          filter: 'blur(15px)'
         },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1, 
-          rotationX: 0, 
-          filter: 'blur(0px)', 
-          duration: 3, 
-          delay: 0.2, 
-          ease: 'expo.out' 
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          filter: 'blur(0px)',
+          duration: 3,
+          delay: 0.2,
+          ease: 'expo.out'
         }
       )
 
       // Cards reveal: slide up from below
-      tl.fromTo([cardLeftRef.current, cardRightRef.current],
+      tl.fromTo([cardLeftRef.current, cardRightRef.current, buttonRef.current],
         { y: 80, opacity: 0 },
         { y: 0, opacity: 1, duration: 1.5 },
         "-=1.2" // Overlap heavily with title animation
@@ -89,7 +92,7 @@ export default function BirthdayUI() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-[radial-gradient(circle,rgba(245,158,11,0.15)_0%,transparent_70%)] rounded-full pointer-events-none z-0"></div>
 
       {/* 3D Canvas Interactive Area */}
-      <div className="absolute inset-0 z-10" style={{ touchAction: 'none' }}>
+      <div className="absolute inset-0 z-10 h-100vh w-screen" style={{ touchAction: 'none' }}>
         <Canvas camera={{ position: [0, 0, 7], fov: 45 }} dpr={[1, 1.5]}>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
@@ -123,7 +126,47 @@ export default function BirthdayUI() {
       </div>
 
       {/* Foreground UI - Bottom */}
-      <div className="z-10 flex flex-row justify-between items-end px-4 md:px-12 pointer-events-none w-full mt-auto mb-6 md:mb-12">
+      <div className="z-10 flex flex-row justify-between items-end px-4 md:px-12 pointer-events-none w-full mt-auto mb-6 md:mb-12 relative">
+
+        {/* Bottom Center Button */}
+        <div className="absolute left-1/2 -bottom-15 md:-bottom-20 -translate-x-1/2 pointer-events-auto z-20">
+          <button
+            ref={buttonRef}
+            onClick={() => {
+              if (buttonRef.current) buttonRef.current.style.pointerEvents = 'none';
+
+              const overlay = document.createElement('div');
+              overlay.className = 'fixed inset-0 z-[9999] pointer-events-none bg-[#030106]';
+              overlay.style.transform = 'translateY(100%)';
+              document.body.appendChild(overlay);
+
+              gsap.to(overlay, {
+                y: '0%',
+                duration: 1,
+                ease: 'expo.inOut',
+                onComplete: () => {
+                  router.push('/cta');
+                  
+                  setTimeout(() => {
+                    gsap.to(overlay, {
+                      y: '-100%',
+                      duration: 1,
+                      ease: 'expo.inOut',
+                      onComplete: () => {
+                        if (document.body.contains(overlay)) {
+                          document.body.removeChild(overlay);
+                        }
+                      }
+                    });
+                  }, 400);
+                }
+              });
+            }}
+            className="px-6 py-3 md:px-8 md:py-3.5 bg-gradient-to-r from-purple-500/60 to-pink-500/20 hover:from-purple-500/80 hover:to-pink-500/80 backdrop-blur-xl border border-white/20 rounded-full text-white/95 font-medium tracking-[0.15em] uppercase text-xs md:text-sm transition-all duration-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(219,39,119,0.3)] opacity-0 shadow-[0_0_20px_rgba(0,0,0,0.5)] whitespace-nowrap"
+          >
+            Continue Journey
+          </button>
+        </div>
 
         {/* Left Side Container */}
         <div

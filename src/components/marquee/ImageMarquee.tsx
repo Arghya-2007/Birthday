@@ -46,7 +46,7 @@ export default function ImageMarquee() {
               src={memory.src}
               alt={memory.title}
               fill
-              className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 blur-[2px] grayscale-[30%] group-hover:blur-0 group-hover:grayscale-0"
+              className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
               sizes="(max-width: 768px) 260px, 340px"
               priority={idx < 4}
             />
@@ -75,7 +75,7 @@ export default function ImageMarquee() {
               src={memory.src}
               alt={memory.title}
               fill
-              className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 blur-[2px] grayscale-[30%] group-hover:blur-0 group-hover:grayscale-0"
+              className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
               sizes="(max-width: 768px) 260px, 340px"
               priority={idx < 4}
             />
