@@ -48,88 +48,126 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
         if (!percentRef.current) return;
         const currentVal = Math.round(progressObj.current.value);
         if (progress >= 100 && currentVal >= 99) {
-          // If we haven't set the 'Enter' text yet, just say Ready
-          if (percentRef.current.innerText !== 'Enter') {
-            percentRef.current.innerText = 'Ready.';
+          if (percentRef.current.innerText !== 'Begin') {
+            percentRef.current.innerText = 'Begin';
           }
         } else {
-          percentRef.current.innerText = `${currentVal}%`;
+          percentRef.current.innerText = currentVal.toString();
         }
       }
     });
 
     if (progress >= 100) {
-      // 800ms for animation to reach 100, plus a brief pause to read "Ready."
       const timer = setTimeout(() => {
         setIsReady(true);
-        if (percentRef.current) {
-          percentRef.current.innerText = 'Enter';
-          // Add a subtle pulse to invite the click
-          gsap.to(percentRef.current, {
-            scale: 1.05,
-            opacity: 0.8,
-            duration: 1,
+        if (messageRef.current) {
+          messageRef.current.innerText = 'Click anywhere to enter';
+          gsap.to(messageRef.current, {
+            opacity: 0.7,
             yoyo: true,
             repeat: -1,
+            duration: 1.5,
             ease: "sine.inOut"
           });
         }
-      }, 1400);
-      
+
+        if (percentRef.current) {
+          gsap.to(percentRef.current, {
+            textShadow: "0px 0px 30px rgba(201, 169, 110, 0.3)",
+            duration: 2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1
+          });
+        }
+
+        if (barContainerRef.current) {
+          gsap.to(barContainerRef.current, {
+            opacity: 0,
+            duration: 1,
+            ease: "power2.out"
+          });
+        }
+      }, 1200);
+
       return () => clearTimeout(timer);
     }
   }, [progress, onComplete]);
 
   const handleEnter = () => {
     if (!isReady) return;
-    
-    // Stop the pulsing animation before exiting
+
+    // Stop pulsing animations
+    if (messageRef.current) gsap.killTweensOf(messageRef.current);
     if (percentRef.current) gsap.killTweensOf(percentRef.current);
-    
-    playLoaderExit(containerRef).then(() => {
+
+    // Gather inner elements to hide before the main curtain exit
+    const elementsToHide: HTMLElement[] = [];
+    if (dateRef.current) elementsToHide.push(dateRef.current);
+    if (messageRef.current) elementsToHide.push(messageRef.current);
+    if (percentRef.current) elementsToHide.push(percentRef.current);
+
+    playLoaderExit(containerRef, elementsToHide).then(() => {
       onComplete();
     });
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       onClick={handleEnter}
-      className={`fixed inset-0 flex flex-col items-center justify-center bg-bg text-text-primary z-[var(--z-loader)] ${isReady ? 'cursor-pointer' : ''}`}
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-bg text-text-primary z-[var(--z-loader)] overflow-hidden ${isReady ? 'cursor-pointer' : ''}`}
     >
-      <div className="flex flex-col items-center flex-grow justify-center w-full pointer-events-none">
-        <div 
-          ref={dateRef}
-          className="font-display uppercase tracking-cinematic text-text-secondary text-xs mb-4 opacity-0"
-        >
-          AUGUST 2026
-        </div>
-        
-        <div 
-          ref={messageRef}
-          className="font-body uppercase tracking-wide text-text-secondary text-xs opacity-0"
-        >
-          Preparing something special...
-        </div>
-        
-        <div className="h-16"></div> {/* Spacer */}
-        
-        <div 
-          ref={percentRef}
-          className="font-display text-[clamp(3rem,6vw,4.5rem)] font-light text-ivory opacity-0 tracking-normal transition-colors hover:text-champagne"
-        >
-          0%
-        </div>
-      </div>
+      {/* Subtle ambient glows for premium lighting effect */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-champagne/5 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30vw] h-[30vw] bg-amber/5 rounded-full blur-[80px] pointer-events-none mix-blend-screen" />
 
-      <div 
-        ref={barContainerRef}
-        className="w-full h-[1px] bg-muted absolute bottom-0 opacity-0 pointer-events-none"
-      >
-        <div 
-          ref={barFillRef}
-          className="h-full bg-champagne w-0"
-        ></div>
+      <div className="flex flex-col items-center justify-between w-full h-full z-10 pointer-events-none py-16">
+
+        {/* Top Section */}
+        <div className="px-4 py-2">
+          <div
+            ref={dateRef}
+            className="font-body uppercase tracking-[0.4em] text-champagne text-[10px] md:text-xs font-light opacity-0"
+          >
+            A Special Celebration
+          </div>
+        </div>
+
+        {/* Middle Section */}
+        <div className="flex flex-col items-center justify-center flex-grow w-full">
+          <div className="mb-6 px-8 py-4">
+            <div
+              ref={percentRef}
+              className="font-display text-[clamp(5rem,18vw,14rem)] font-light text-ivory opacity-0 leading-none tracking-tight"
+            >
+              0
+            </div>
+          </div>
+
+          <div className="h-6 px-4">
+            <div
+              ref={messageRef}
+              className="font-body uppercase tracking-widest text-text-secondary text-[10px] md:text-xs opacity-0"
+            >
+              Curating memories...
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="w-full max-w-md px-12 flex flex-col items-center">
+          <div
+            ref={barContainerRef}
+            className="w-full h-[1px] bg-white/10 opacity-0 overflow-hidden rounded-full"
+          >
+            <div
+              ref={barFillRef}
+              className="h-full bg-gradient-to-r from-champagne/50 to-champagne w-0 origin-left"
+            ></div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

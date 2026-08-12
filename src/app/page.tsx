@@ -14,6 +14,7 @@ import StorySection from '@/components/story/StorySection'
 import MessageSection from '@/components/story/MessageSection'
 import TraitsDisplay from '@/components/story/TraitsDisplay'
 import BirthdayExperience from '@/components/birthday/BirthdayExperience'
+import ImageMarquee from '@/components/marquee/ImageMarquee'
 
 export default function Page() {
   useLenis()
@@ -123,6 +124,8 @@ export default function Page() {
           {/* Scene 05 — The Reveal */}
           <StorySection scene={birthdayContent.scenes[4]} totalFrames={TOTAL_FRAMES} />
         </ImageSequence>
+
+        <ImageMarquee />
 
         <BirthdayExperience />
       </main>
