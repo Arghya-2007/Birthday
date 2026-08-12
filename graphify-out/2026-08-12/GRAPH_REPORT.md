@@ -1,16 +1,16 @@
 # Graph Report - Birthday-Gift  (2026-08-12)
 
 ## Corpus Check
-- 56 files · ~1,674,335 words
+- 51 files · ~1,668,109 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 457 nodes · 585 edges · 40 communities (35 shown, 5 thin omitted)
+- 442 nodes · 558 edges · 42 communities (35 shown, 7 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `db4bcb23`
+- Built from commit: `e2040f1b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -27,6 +27,7 @@
 - devDependencies
 - Design.md — Visual Design System
 - 9. 3D Cake Scene Design
+- LoadingScreen.tsx
 - 11. UI Components
 - 12. Motion Design Principles
 - 5. Loading Screen Design
@@ -37,6 +38,7 @@
 - 8. Birthday Transformation Design
 - README.md
 - layout.tsx
+- BirthdayUI.tsx
 - 2. Visual Identity
 - AGENTS.md
 - eslint.config.mjs
@@ -47,43 +49,43 @@
 ## God Nodes (most connected - your core abstractions)
 1. `Design.md — Visual Design System` - 19 edges
 2. `PRD — Premium Interactive Birthday Experience` - 19 edges
-3. `ImageTrailBase` - 18 edges
-4. `Architecture.md — Technical Architecture` - 17 edges
-5. `compilerOptions` - 16 edges
-6. `Phases.md — Development Phases` - 16 edges
-7. `ImageTrailVariant1` - 12 edges
-8. `lerp()` - 9 edges
+3. `Architecture.md — Technical Architecture` - 17 edges
+4. `compilerOptions` - 16 edges
+5. `Phases.md — Development Phases` - 16 edges
+6. `ImageTrailVariant6` - 10 edges
+7. `lerp()` - 9 edges
+8. `getLocalPointerPos()` - 9 edges
 9. `getMouseDistance()` - 9 edges
-10. `useImageSequence()` - 9 edges
+10. `ImageTrailVariant1` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `useLenis()` --references--> `lenis`  [EXTRACTED]
   src/hooks/useLenis.ts → package.json
-- `Page()` --calls--> `preloadCriticalAssets()`  [EXTRACTED]
-  src/app/page.tsx → src/lib/preload.ts
-- `CTAUI()` --calls--> `playBackgroundAudio()`  [EXTRACTED]
-  src/components/cta/CTAUI.tsx → src/lib/audio.ts
-- `ImageSequence()` --calls--> `useImageSequence()`  [EXTRACTED]
-  src/components/sequence/ImageSequence.tsx → src/hooks/useImageSequence.ts
-- `MessageSection()` --calls--> `useSequenceContext()`  [EXTRACTED]
-  src/components/story/MessageSection.tsx → src/components/sequence/SequenceContext.ts
+- `StorySection()` --calls--> `useSequenceContext()`  [EXTRACTED]
+  src/components/story/StorySection.tsx → src/components/sequence/SequenceContext.ts
+- `Hero()` --calls--> `playHeroEntrance()`  [EXTRACTED]
+  src/components/hero/Hero.tsx → src/animations/heroAnimations.ts
+- `LoadingScreen()` --calls--> `playLoaderEntrance()`  [EXTRACTED]
+  src/components/loading/LoadingScreen.tsx → src/animations/loadingAnimations.ts
+- `LoadingScreen()` --calls--> `playLoaderExit()`  [EXTRACTED]
+  src/components/loading/LoadingScreen.tsx → src/animations/loadingAnimations.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (40 total, 5 thin omitted)
+## Communities (42 total, 7 thin omitted)
 
 ### Community 0 - ".render"
-Cohesion: 0.06
-Nodes (25): cachedRect(), Destroyable, getLocalPointerPos(), getMouseDistance(), getNewPosition(), ImageItem, ImageTrail, ImageTrailBase (+17 more)
+Cohesion: 0.08
+Nodes (10): getLocalPointerPos(), getMouseDistance(), ImageTrailVariant2, ImageTrailVariant3, ImageTrailVariant4, ImageTrailVariant5, ImageTrailVariant6, ImageTrailVariant7 (+2 more)
 
 ### Community 1 - "Architecture.md — Technical Architecture"
 Cohesion: 0.04
 Nodes (47): 10. Performance Architecture, 11. Audio Architecture, 12. Error Boundaries, 13. Routing, 14. Metadata (layout.tsx), 15. AI Agent Rules (from Project Plan §38), 1. Technology Stack, 2. Folder Structure (+39 more)
 
 ### Community 2 - "app/page.tsx"
-Cohesion: 0.19
-Nodes (16): disposeCache(), FrameCache, globalFrameCache, loadFrame(), preloadAhead(), preloadFrameRange(), releaseFramesOutsideWindow(), DeviceTier (+8 more)
+Cohesion: 0.08
+Nodes (29): createTraitReveal(), Page(), BirthdayExperience(), ImageSequence(), ImageSequenceProps, SequenceCanvas(), SequenceCanvasProps, SequenceContext (+21 more)
 
 ### Community 3 - "Phases.md — Development Phases"
 Cohesion: 0.05
@@ -95,19 +97,19 @@ Nodes (30): 10. Design Requirements, 11. Performance Requirements, 12. Accessibi
 
 ### Community 5 - "dependencies"
 Cohesion: 0.07
-Nodes (27): gsap, howler, next, dependencies, gsap, howler, next, react (+19 more)
+Nodes (29): gsap, howler, lenis, next, dependencies, gsap, howler, lenis (+21 more)
 
 ### Community 6 - "compilerOptions"
 Cohesion: 0.07
 Nodes (28): dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules (+20 more)
 
 ### Community 7 - "ImageTrail.tsx"
-Cohesion: 0.08
-Nodes (22): createTraitReveal(), ImageSequence(), ImageSequenceProps, SequenceCanvas(), SequenceCanvasProps, SequenceContext, useSequenceContext(), MessageSection() (+14 more)
+Cohesion: 0.12
+Nodes (13): cachedRect(), getNewPosition(), ImageItem, ImageTrail, ImageTrailConstructor, ImageTrailProps, ImageTrailVariant1, _point (+5 more)
 
 ### Community 8 - "StorySection.tsx"
-Cohesion: 0.07
-Nodes (21): lenis, lenis, HeroRefs, playHeroEntrance(), playLoaderEntrance(), playLoaderExit(), Page(), BirthdayExperience() (+13 more)
+Cohesion: 0.12
+Nodes (16): HeroRefs, playHeroEntrance(), Hero(), HeroProps, Marquee(), MarqueeProps, Content, CURRENT_YEAR (+8 more)
 
 ### Community 9 - "devDependencies"
 Cohesion: 0.10
@@ -120,6 +122,10 @@ Nodes (9): 10. Final Message Design, 13. Spacing System, 14. Z-Index Stack, 15. 
 ### Community 11 - "9. 3D Cake Scene Design"
 Cohesion: 0.33
 Nodes (6): 9. 3D Cake Scene Design, Camera, Candle Behavior, Lighting Setup, Post-Extinguish, Visual Target
+
+### Community 12 - "LoadingScreen.tsx"
+Cohesion: 0.60
+Nodes (4): playLoaderEntrance(), playLoaderExit(), LoadingScreen(), LoadingScreenProps
 
 ### Community 13 - "11. UI Components"
 Cohesion: 0.40
@@ -157,33 +163,29 @@ Nodes (4): 8. Birthday Transformation Design, Concept, End Frame visual descript
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
-### Community 22 - "layout.tsx"
-Cohesion: 0.22
-Nodes (8): metadata, viewport, ColorRGB, Pointer, pointerPrototype(), SplashCursor(), SplashCursorProps, TextureFormat
-
 ### Community 24 - "2. Visual Identity"
 Cohesion: 0.67
 Nodes (3): 2. Visual Identity, Anti-Keywords (things to avoid completely), Keywords
 
 ## Knowledge Gaps
-- **228 isolated node(s):** `eslintConfig`, `nextConfig`, `name`, `version`, `private` (+223 more)
+- **221 isolated node(s):** `eslintConfig`, `nextConfig`, `name`, `version`, `private` (+216 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dependencies` connect `dependencies` to `StorySection.tsx`?**
-  _High betweenness centrality (0.082) - this node is a cross-community bridge._
-- **Why does `lenis` connect `StorySection.tsx` to `dependencies`?**
-  _High betweenness centrality (0.079) - this node is a cross-community bridge._
+- **Why does `useLenis()` connect `app/page.tsx` to `dependencies`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Why does `lenis` connect `dependencies` to `app/page.tsx`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
 - **What connects `eslintConfig`, `nextConfig`, `name` to the rest of the system?**
-  _228 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _221 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `.render` be split into smaller, more focused modules?**
-  _Cohesion score 0.06351236146632566 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0815686274509804 - nodes in this community are weakly interconnected._
 - **Should `Architecture.md — Technical Architecture` be split into smaller, more focused modules?**
   _Cohesion score 0.041666666666666664 - nodes in this community are weakly interconnected._
+- **Should `app/page.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.08067375886524823 - nodes in this community are weakly interconnected._
 - **Should `Phases.md — Development Phases` be split into smaller, more focused modules?**
   _Cohesion score 0.047619047619047616 - nodes in this community are weakly interconnected._
-- **Should `PRD — Premium Interactive Birthday Experience` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._

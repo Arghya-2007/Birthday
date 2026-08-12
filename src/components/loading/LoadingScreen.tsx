@@ -4,12 +4,78 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { playLoaderEntrance, playLoaderExit } from '@/animations/loadingAnimations';
 
+/* ─── Device Gate ─────────────────────────────────────────────────────────── */
+
+const MIN_DESKTOP_WIDTH = 1024;
+
+function useDeviceCheck() {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MIN_DESKTOP_WIDTH - 1}px)`);
+
+    const update = () => setIsMobile(mql.matches);
+    update();
+
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  return isMobile;
+}
+
+function MobileBlockScreen() {
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg text-text-primary z-[9999] overflow-hidden select-none">
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] bg-champagne/5 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center px-8 text-center max-w-sm">
+        {/* Monitor icon */}
+        <svg
+          className="w-16 h-16 mb-8 text-champagne opacity-80"
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="6" y="8" width="52" height="36" rx="3" />
+          <line x1="32" y1="44" x2="32" y2="52" />
+          <line x1="22" y1="52" x2="42" y2="52" />
+          <line x1="6" y1="38" x2="58" y2="38" />
+        </svg>
+
+        <h1 className="font-display text-3xl sm:text-4xl font-light text-ivory leading-snug mb-4">
+          Desktop Only
+        </h1>
+
+        <div className="w-12 h-[1px] bg-champagne/40 mb-6" />
+
+        <p className="font-body text-text-secondary text-sm leading-relaxed tracking-wide mb-8">
+          This experience has been crafted for larger screens. Please open it on a{' '}
+          <span className="text-champagne font-medium">laptop</span> or{' '}
+          <span className="text-champagne font-medium">desktop</span> to enjoy the full experience.
+        </p>
+
+        <div className="font-body uppercase tracking-[0.3em] text-champagne/50 text-[10px]">
+          Minimum 1024px viewport
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Loading Screen ──────────────────────────────────────────────────────── */
+
 interface LoadingScreenProps {
   progress: number;
   onComplete: () => void;
 }
 
 export default function LoadingScreen({ progress, onComplete }: LoadingScreenProps) {
+  const isMobile = useDeviceCheck();
   const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
@@ -19,17 +85,23 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
   const barFillRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Don't run entrance animation on mobile — we'll show the block screen
+    if (isMobile !== false) return;
+
     playLoaderEntrance({
       date: dateRef,
       message: messageRef,
       percent: percentRef,
       bar: barContainerRef,
     });
-  }, []);
+  }, [isMobile]);
 
   const progressObj = useRef({ value: 0 });
 
   useEffect(() => {
+    // Skip progress animation while device check is pending or on mobile
+    if (isMobile !== false) return;
+
     // Update GSAP bar width smoothly
     if (barFillRef.current) {
       gsap.to(barFillRef.current, {
@@ -92,7 +164,7 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
 
       return () => clearTimeout(timer);
     }
-  }, [progress, onComplete]);
+  }, [progress, onComplete, isMobile]);
 
   const handleEnter = () => {
     if (!isReady) return;
@@ -111,6 +183,16 @@ export default function LoadingScreen({ progress, onComplete }: LoadingScreenPro
       onComplete();
     });
   };
+
+  /* ── Device gate: block mobile / tablet / unknown ── */
+  if (isMobile === null) {
+    // SSR / hydration: render nothing until client-side check completes
+    return <div className="fixed inset-0 bg-bg z-[9999]" />;
+  }
+
+  if (isMobile) {
+    return <MobileBlockScreen />;
+  }
 
   return (
     <div
