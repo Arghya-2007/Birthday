@@ -77,12 +77,14 @@ export async function preloadFrameRange(
  *
  * @param cache        The frame cache to evict from
  * @param currentFrame The frame the user is currently viewing
- * @param _behind       Number of frames to keep behind the current frame
- * @param _ahead        Number of frames to keep ahead of the current frame
+ * @param behind       Number of frames to keep behind the current frame
+ * @param ahead        Number of frames to keep ahead of the current frame
  */
 export function releaseFramesOutsideWindow(
-  _behind: number = 20,
-  _ahead: number = 30
+  cache: FrameCache,
+  currentFrame: number,
+  behind: number = 20,
+  ahead: number = 30
 ): void {
   // We preload all frames initially now, so no eviction is needed
   // This ensures perfectly smooth rendering when scrolling back and forth.
