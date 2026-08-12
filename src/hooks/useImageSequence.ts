@@ -9,6 +9,8 @@ import {
   globalFrameCache,
   preloadFrameRange,
   releaseFramesOutsideWindow,
+  disposeCache,
+  preloadAhead,
 } from '@/components/sequence/sequenceLoader'
 
 interface UseImageSequenceOptions {
@@ -29,7 +31,7 @@ interface UseImageSequenceReturn {
  * - Current frame index (ref, not state)
  * - Progressive loading (critical frames first, then background)
  * - Canvas sizing (devicePixelRatio for sharp rendering)
- * - Memory management on low-tier devices
+ * - Memory management via sliding window eviction on ALL devices
  */
 export function useImageSequence({
   totalFrames,
@@ -39,6 +41,7 @@ export function useImageSequence({
   const currentFrameRef = useRef<number>(0)
   const cacheRef = useRef(globalFrameCache)
   const deviceRef = useRef<'desktop' | 'mobile'>('desktop')
+  const preloadControllerRef = useRef<AbortController | null>(null)
 
   const [isReady, setIsReady] = useState(false)
   const [loadedCount, setLoadedCount] = useState(0)
@@ -61,6 +64,9 @@ export function useImageSequence({
    * Draw a specific frame index to the canvas.
    * If the exact frame isn't cached, draws the nearest available frame.
    * Uses ref — never triggers React re-render.
+   *
+   * MEMORY FIX: Always evicts frames outside the sliding window
+   * and triggers background preloading ahead of the current position.
    */
   const drawFrame = useCallback((index: number) => {
     const canvas = canvasRef.current
@@ -70,6 +76,7 @@ export function useImageSequence({
     if (!ctx) return
 
     const cache = cacheRef.current
+    currentFrameRef.current = index
 
     // Try exact frame first
     let frame = cache.get(index)
@@ -96,11 +103,25 @@ export function useImageSequence({
       drawFrameToCanvas(ctx, frame, canvas.width, canvas.height)
     }
 
-    // Memory management on low-tier devices
-    if (deviceTier === 'low') {
-      releaseFramesOutsideWindow(cache, index)
+    // Memory management: ALWAYS apply sliding window eviction
+    // High-tier: keep wider window (±50 frames)
+    // Low-tier: keep narrower window (±20 frames)
+    const behind = deviceTier === 'low' ? 10 : 20
+    const ahead = deviceTier === 'low' ? 20 : 40
+    releaseFramesOutsideWindow(cache, index, behind, ahead)
+
+    // Trigger background preload ahead of current position
+    if (preloadControllerRef.current) {
+      preloadControllerRef.current.abort()
     }
-  }, [deviceTier])
+    preloadControllerRef.current = preloadAhead(
+      index,
+      totalFrames,
+      deviceRef.current,
+      cache,
+      ahead
+    )
+  }, [deviceTier, totalFrames])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -115,8 +136,11 @@ export function useImageSequence({
     let cancelled = false
 
     async function loadSequence() {
-      // Load all frames (these are usually already loaded by the LoadingScreen preloader)
-      await preloadFrameRange(1, totalFrames, device, cache, () => {
+      // Load initial batch of frames (critical frames should already be
+      // cached by the loading screen preloader). This will only fetch
+      // any frames that aren't already in the cache.
+      const initialEnd = Math.min(30, totalFrames)
+      await preloadFrameRange(1, initialEnd, device, cache, () => {
         if (!cancelled) {
           setLoadedCount(cache.size)
         }
@@ -151,11 +175,13 @@ export function useImageSequence({
       clearTimeout(resizeTimeout)
       window.removeEventListener('resize', handleResize)
 
-      // Cleanup: close all ImageBitmaps and clear cache
-      for (const [, bitmap] of cache) {
-        bitmap.close()
+      // Cancel any in-flight preloading
+      if (preloadControllerRef.current) {
+        preloadControllerRef.current.abort()
       }
-      cache.clear()
+
+      // Cleanup: close all ImageBitmaps and clear cache
+      disposeCache(cache)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalFrames])

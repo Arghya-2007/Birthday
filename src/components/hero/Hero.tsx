@@ -9,9 +9,10 @@ import Image from 'next/image';
 
 interface HeroProps {
   onEntranceComplete?: () => void;
+  isActive?: boolean;
 }
 
-export default function Hero({ onEntranceComplete }: HeroProps) {
+export default function Hero({ onEntranceComplete, isActive = true }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Refs for animation
@@ -29,13 +30,12 @@ export default function Hero({ onEntranceComplete }: HeroProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
+  // Set initial states once on mount to prevent flash
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Set initial states to prevent flash
       gsap.set(containerRef.current, { opacity: 0 });
-      
       gsap.set([topMarqueeRef.current, bottomMarqueeRef.current], { opacity: 0 });
       gsap.set(sceneLabelRef.current, { opacity: 0, y: prefersReducedMotion ? 0 : 15 });
       gsap.set(titleRef.current, { opacity: 0, y: prefersReducedMotion ? 0 : 20 });
@@ -45,6 +45,17 @@ export default function Hero({ onEntranceComplete }: HeroProps) {
       gsap.set(imageContainerRef.current, { opacity: 0, scale: prefersReducedMotion ? 1 : 0.95 });
       gsap.set(imageRef.current, { scale: prefersReducedMotion ? 1 : 1.15 });
       gsap.set(descriptionRef.current, { opacity: 0, y: prefersReducedMotion ? 0 : 10 });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Play animation when active
+  useLayoutEffect(() => {
+    if (!isActive) return;
+
+    const ctx = gsap.context(() => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       playHeroEntrance(
         {
@@ -65,7 +76,7 @@ export default function Hero({ onEntranceComplete }: HeroProps) {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [onEntranceComplete]);
+  }, [isActive, onEntranceComplete]);
 
   return (
     <div

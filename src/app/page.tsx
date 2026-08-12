@@ -24,7 +24,7 @@ export default function Page() {
   useEffect(() => {
     if (!isLoading) {
       const sound = new Howl({
-        src: ['/audio/background-music.mp3'],
+        src: ['/audio/bg-music.mp3'],
         loop: true,
         volume: 1,
         html5: true, // Crucial for large audio files to stream and bypass some autoplay blocks
@@ -91,42 +91,41 @@ export default function Page() {
         />
       )}
 
-      {!isLoading && (
-        <main>
-          <Hero onEntranceComplete={() => console.log('Hero entrance complete')} />
-          <ImageSequence
+      {/* Main is always rendered so heavy components are already in the DOM, preventing lag spikes when loading finishes. */}
+      <main className={isLoading ? "h-screen overflow-hidden pointer-events-none" : ""}>
+        <Hero isActive={!isLoading} onEntranceComplete={() => console.log('Hero entrance complete')} />
+        <ImageSequence
+          totalFrames={TOTAL_FRAMES}
+        >
+          {/* Scene 01 */}
+          <StorySection scene={birthdayContent.scenes[0]} totalFrames={TOTAL_FRAMES} />
+
+          {/* Scene 02 */}
+          <StorySection scene={birthdayContent.scenes[1]} totalFrames={TOTAL_FRAMES} />
+
+          {/* Scene 03 — Traits */}
+          <TraitsDisplay
+            traits={birthdayContent.traits}
+            devReference={birthdayContent.devReference}
+            frameStart={birthdayContent.scenes[2].frameStart}
+            frameEnd={birthdayContent.scenes[2].frameEnd}
             totalFrames={TOTAL_FRAMES}
-          >
-            {/* Scene 01 */}
-            <StorySection scene={birthdayContent.scenes[0]} totalFrames={TOTAL_FRAMES} />
+          />
 
-            {/* Scene 02 */}
-            <StorySection scene={birthdayContent.scenes[1]} totalFrames={TOTAL_FRAMES} />
+          {/* Scene 04 — Personal Message */}
+          <MessageSection
+            text={birthdayContent.scenes[3].text ?? ''}
+            frameStart={birthdayContent.scenes[3].frameStart}
+            frameEnd={birthdayContent.scenes[3].frameEnd}
+            totalFrames={TOTAL_FRAMES}
+          />
 
-            {/* Scene 03 — Traits */}
-            <TraitsDisplay
-              traits={birthdayContent.traits}
-              devReference={birthdayContent.devReference}
-              frameStart={birthdayContent.scenes[2].frameStart}
-              frameEnd={birthdayContent.scenes[2].frameEnd}
-              totalFrames={TOTAL_FRAMES}
-            />
+          {/* Scene 05 — The Reveal */}
+          <StorySection scene={birthdayContent.scenes[4]} totalFrames={TOTAL_FRAMES} />
+        </ImageSequence>
 
-            {/* Scene 04 — Personal Message */}
-            <MessageSection
-              text={birthdayContent.scenes[3].text ?? ''}
-              frameStart={birthdayContent.scenes[3].frameStart}
-              frameEnd={birthdayContent.scenes[3].frameEnd}
-              totalFrames={TOTAL_FRAMES}
-            />
-
-            {/* Scene 05 — The Reveal */}
-            <StorySection scene={birthdayContent.scenes[4]} totalFrames={TOTAL_FRAMES} />
-          </ImageSequence>
-
-          <BirthdayExperience />
-        </main>
-      )}
+        <BirthdayExperience />
+      </main>
     </>
   )
 }

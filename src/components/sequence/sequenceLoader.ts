@@ -28,13 +28,17 @@ export async function loadFrame(url: string): Promise<ImageBitmap | null> {
  * Preload a range of frames concurrently.
  * Skips frames already in cache. Stores each loaded ImageBitmap in the cache.
  * Calls onProgress after each frame loads (loaded count, total in range).
+ *
+ * Uses a concurrency limit to avoid saturating the network and memory
+ * when loading many frames at once.
  */
 export async function preloadFrameRange(
   startIndex: number,
   endIndex: number,
   device: 'desktop' | 'mobile',
   cache: FrameCache,
-  onProgress?: (loaded: number, total: number) => void
+  onProgress?: (loaded: number, total: number) => void,
+  concurrency: number = 6
 ): Promise<void> {
   const indices: number[] = []
   for (let i = startIndex; i <= endIndex; i++) {
@@ -51,32 +55,37 @@ export async function preloadFrameRange(
 
   let loaded = 0
 
-  await Promise.all(
-    indices.map(async (frameIndex) => {
-      const url = getFrameUrl(frameIndex, device)
-      const bitmap = await loadFrame(url)
-      if (bitmap) {
-        cache.set(frameIndex, bitmap)
-      }
-      loaded++
-      onProgress?.(loaded, total)
-    })
-  )
+  // Load with concurrency limit to avoid overwhelming memory
+  for (let i = 0; i < indices.length; i += concurrency) {
+    const batch = indices.slice(i, i + concurrency)
+    await Promise.all(
+      batch.map(async (frameIndex) => {
+        const url = getFrameUrl(frameIndex, device)
+        const bitmap = await loadFrame(url)
+        if (bitmap) {
+          cache.set(frameIndex, bitmap)
+        }
+        loaded++
+        onProgress?.(loaded, total)
+      })
+    )
+  }
 }
 
 /**
  * Release ImageBitmaps that are far from the current frame to manage memory.
- * Keeps frames within [currentFrame - 20, currentFrame + 30] in cache.
- * Only call this on low-performance devices.
+ *
+ * @param cache        The frame cache to evict from
+ * @param currentFrame The frame the user is currently viewing
+ * @param behind       Number of frames to keep behind the current frame
+ * @param ahead        Number of frames to keep ahead of the current frame
  */
 export function releaseFramesOutsideWindow(
   cache: FrameCache,
   currentFrame: number,
-  windowSize: number = 50
+  behind: number = 20,
+  ahead: number = 30
 ): void {
-  const behind = 20
-  const ahead = windowSize - behind // 30
-
   const minKeep = currentFrame - behind
   const maxKeep = currentFrame + ahead
 
@@ -86,4 +95,47 @@ export function releaseFramesOutsideWindow(
       cache.delete(index)
     }
   }
+}
+
+/**
+ * Dispose all frames in the cache, closing each ImageBitmap.
+ * Call this on component unmount to free GPU memory.
+ */
+export function disposeCache(cache: FrameCache): void {
+  for (const [, bitmap] of cache) {
+    bitmap.close()
+  }
+  cache.clear()
+}
+
+/**
+ * Preload frames ahead of the current position in the background.
+ * Returns an AbortController so the caller can cancel if needed.
+ */
+export function preloadAhead(
+  currentFrame: number,
+  totalFrames: number,
+  device: 'desktop' | 'mobile',
+  cache: FrameCache,
+  ahead: number = 30
+): AbortController {
+  const controller = new AbortController()
+
+  const start = currentFrame + 1
+  const end = Math.min(currentFrame + ahead, totalFrames)
+
+  // Fire and forget — load in background with low concurrency
+  ;(async () => {
+    for (let i = start; i <= end; i++) {
+      if (controller.signal.aborted) break
+      if (cache.has(i)) continue
+      const url = getFrameUrl(i, device)
+      const bitmap = await loadFrame(url)
+      if (bitmap && !controller.signal.aborted) {
+        cache.set(i, bitmap)
+      }
+    }
+  })()
+
+  return controller
 }

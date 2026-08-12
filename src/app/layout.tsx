@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import SplashCursor from "@/components/SplashCursor";
 
 export const metadata: Metadata = {
   title: "A Special Day",
@@ -17,7 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased cursor-none">
+        <SplashCursor 
+          RAINBOW_MODE={true}
+          COLOR="#C9A96E"
+          SPLAT_RADIUS={0.2}
+          SHADING={true}
+        />
         {children}
       </body>
     </html>

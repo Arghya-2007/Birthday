@@ -36,4 +36,6 @@ body {
   color: var(--color-text-primary);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  -webkit-user-select: none;
+  user-select: none;
 }
