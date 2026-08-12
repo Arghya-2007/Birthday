@@ -77,24 +77,15 @@ export async function preloadFrameRange(
  *
  * @param cache        The frame cache to evict from
  * @param currentFrame The frame the user is currently viewing
- * @param behind       Number of frames to keep behind the current frame
- * @param ahead        Number of frames to keep ahead of the current frame
+ * @param _behind       Number of frames to keep behind the current frame
+ * @param _ahead        Number of frames to keep ahead of the current frame
  */
 export function releaseFramesOutsideWindow(
-  cache: FrameCache,
-  currentFrame: number,
-  behind: number = 20,
-  ahead: number = 30
+  _behind: number = 20,
+  _ahead: number = 30
 ): void {
-  const minKeep = currentFrame - behind
-  const maxKeep = currentFrame + ahead
-
-  for (const [index, bitmap] of cache) {
-    if (index < minKeep || index > maxKeep) {
-      bitmap.close()
-      cache.delete(index)
-    }
-  }
+  // We preload all frames initially now, so no eviction is needed
+  // This ensures perfectly smooth rendering when scrolling back and forth.
 }
 
 /**
@@ -121,21 +112,8 @@ export function preloadAhead(
 ): AbortController {
   const controller = new AbortController()
 
-  const start = currentFrame + 1
-  const end = Math.min(currentFrame + ahead, totalFrames)
-
-  // Fire and forget — load in background with low concurrency
-  ;(async () => {
-    for (let i = start; i <= end; i++) {
-      if (controller.signal.aborted) break
-      if (cache.has(i)) continue
-      const url = getFrameUrl(i, device)
-      const bitmap = await loadFrame(url)
-      if (bitmap && !controller.signal.aborted) {
-        cache.set(i, bitmap)
-      }
-    }
-  })()
+  // Background preloading is disabled since all frames are loaded upfront.
+  // We just return the controller to satisfy the hook's type signature.
 
   return controller
 }

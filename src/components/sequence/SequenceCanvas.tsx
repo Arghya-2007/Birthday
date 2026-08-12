@@ -3,7 +3,7 @@
 import React from 'react'
 
 interface SequenceCanvasProps {
-  canvasRef: React.RefObject<HTMLCanvasElement | null>
+  canvasRef: React.Ref<HTMLCanvasElement>
 }
 
 /**

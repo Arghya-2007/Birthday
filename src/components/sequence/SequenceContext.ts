@@ -3,7 +3,7 @@
 import React, { useContext } from 'react'
 
 export const SequenceContext = React.createContext<{
-  containerRef: React.RefObject<HTMLElement | null>
+  containerRef: React.RefObject<HTMLDivElement | null>
   totalFrames: number
 } | null>(null)
 
